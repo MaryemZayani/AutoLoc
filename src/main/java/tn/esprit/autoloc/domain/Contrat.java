@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.*;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,4 +28,10 @@ public class Contrat {
     private BigDecimal montantTotal;
 
     private Boolean valide;
+    @OneToOne
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
+
+    @OneToMany(mappedBy = "contrat", cascade = CascadeType.ALL)
+    private List<Paiement> paiements;
 }

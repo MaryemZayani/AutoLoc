@@ -27,4 +27,7 @@ public class Paiement {
     private LocalDate datePaiement;
 
     private ModePaiement modePaiement;
+    @ManyToOne
+    @JoinColumn(name = "contrat_id")
+    private Contrat contrat;
 }
