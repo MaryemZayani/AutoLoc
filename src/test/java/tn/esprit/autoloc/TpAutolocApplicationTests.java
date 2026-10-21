@@ -1,17 +1,23 @@
+
 package tn.esprit.autoloc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
+import tn.esprit.autoloc.domain.enums.CategorieVehicule;
+import tn.esprit.autoloc.domain.enums.StatutVehicule;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.Client;
 import tn.esprit.autoloc.domain.Vehicule;
 
 import tn.esprit.autoloc.repository.IAgenceRepository;
-import tn.esprit.autoloc.repository.IClientRepository;
-import tn.esprit.autoloc.repository.IVehiculeRepository;
 
+import tn.esprit.autoloc.service.IAgenceService;
+import tn.esprit.autoloc.service.IClientService;
+import tn.esprit.autoloc.service.IVehiculeService;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,414 +25,216 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class TpAutolocApplicationTests {
 
-    // =========================================================
-    // INJECTION DES REPOSITORIES
-    // =========================================================
+    @Autowired
+    private IAgenceRepository agenceRepository;
 
     @Autowired
-    private IAgenceRepository agenceRepo;
+    private IAgenceService agenceService;
 
     @Autowired
-    private IClientRepository clientRepo;
+    private IClientService clientService;
 
     @Autowired
-    private IVehiculeRepository vehiculeRepo;
+    private IVehiculeService vehiculeService;
 
-
-    // =========================================================
-    // TEST 1 : AGENCE
-    // =========================================================
+    // ==========================================
+    // ANCIEN TRAVAIL : TESTS REPOSITORY
+    // ==========================================
 
     @Test
-    void testIAgenceRepository() {
+    void contextLoads() {
+        // Vérifie le démarrage de Spring Boot
+    }
 
-        System.out.println("\n========== TEST AGENCE ==========");
+    @Test
+    void testAjouterAgence() {
 
-        // 1. Création d'une agence
         Agence agence = new Agence();
-
-        agence.setNom("Agence Tunis Centre");
+        agence.setNom("agence1");
         agence.setAdresse("Tunis");
 
-        System.out.println(
-                "Agence avant enregistrement : " + agence
-        );
+        Agence agenceEnregistree = agenceRepository.save(agence);
 
+        assertNotNull(agenceEnregistree);
+        assertNotNull(agenceEnregistree.getIdAgence());
 
-        // 2. SAVE()
-        // Enregistrer l'agence dans la base
-        Agence agenceSaved =
-                agenceRepo.save(agence);
+        System.out.println("Agence ajoutée : " + agenceEnregistree);
+    }
 
-        System.out.println(
-                "Agence enregistrée : " + agenceSaved
-        );
+    @Test
+    void testAfficherAgences() {
 
-        assertNotNull(agenceSaved);
-
-
-        // 3. FINDALL()
-        // Récupérer toutes les agences
-        List<Agence> agences =
-                agenceRepo.findAll();
-
-        System.out.println(
-                "Liste des agences : " + agences
-        );
-
-        System.out.println(
-                "Nombre d'agences dans la liste : "
-                        + agences.size()
-        );
+        List<Agence> agences = agenceRepository.findAll();
 
         assertNotNull(agences);
 
+        System.out.println("Liste des agences :");
 
-        // 4. FINDBYID()
-        // Rechercher l'agence créée avec son ID
-        Agence agenceTrouvee =
-                agenceRepo
-                        .findById(
-                                agenceSaved.getIdAgence()
-                        )
-                        .orElse(null);
-
-        System.out.println(
-                "Agence trouvée par ID : "
-                        + agenceTrouvee
-        );
-
-        assertNotNull(agenceTrouvee);
-
-
-        // 5. EXISTSBYID()
-        // Vérifier que l'agence existe
-        boolean existe =
-                agenceRepo.existsById(
-                        agenceSaved.getIdAgence()
-                );
-
-        System.out.println(
-                "L'agence existe ? " + existe
-        );
-
-        assertTrue(existe);
-
-
-        // 6. COUNT()
-        // Compter le nombre total d'agences
-        long nombreAgences =
-                agenceRepo.count();
-
-        System.out.println(
-                "Nombre total d'agences : "
-                        + nombreAgences
-        );
-
-
-        // PAS DE DELETE
-        // L'agence reste dans la base de données
-
-        System.out.println(
-                "L'agence reste enregistrée dans la base."
-        );
-
-        System.out.println(
-                "========== FIN TEST AGENCE ==========\n"
-        );
+        for (Agence agence : agences) {
+            System.out.println(agence);
+        }
     }
 
-
-    // =========================================================
-    // TEST 2 : CLIENT
-    // =========================================================
+    // ==========================================
+    // ATELIER 4 - PARTIE 2 : AGENCE SERVICE
+    // ==========================================
 
     @Test
-    void testIClientRepository() {
+    void testAgenceService() {
 
-        System.out.println("\n========== TEST CLIENT ==========");
+        Agence agence = new Agence();
+        agence.setNom("Agence Atelier 4");
+        agence.setVille("Tunis");
+        agence.setAdresse("Centre-ville");
+        agence.setTelephone("71000000");
 
+        Agence sauvegardee = agenceService.create(agence);
 
-        // 1. Création du premier client
+        assertNotNull(sauvegardee);
+        assertNotNull(sauvegardee.getIdAgence());
+
+        Long id = sauvegardee.getIdAgence();
+
+        System.out.println("Agence créée : " + sauvegardee);
+
+        List<Agence> agences = agenceService.findAll();
+        assertNotNull(agences);
+
+        System.out.println("Liste des agences : " + agences);
+
+        Agence trouvee = agenceService.findById(id);
+        assertNotNull(trouvee);
+
+        System.out.println("Agence trouvée : " + trouvee);
+
+        System.out.println("Nombre d'agences : " + agences.size());
+
+        agenceService.deleteById(id);
+
+        boolean existe = agenceService.findAll()
+                .stream()
+                .anyMatch(a -> id.equals(a.getIdAgence()));
+
+        assertFalse(existe);
+
+        System.out.println("Agence supprimée !");
+    }
+
+    // ==========================================
+    // ATELIER 4 - PARTIE 3 : CLIENT SERVICE
+    // ==========================================
+
+    @Test
+    void testClientService() {
+
         Client client1 = new Client();
-
         client1.setNom("Ben Ali");
         client1.setPrenom("Ahmed");
-        client1.setEmail("ahmed@gmail.com");
-        client1.setTelephone("20111222");
+        client1.setEmail("ahmed@example.com");
+        client1.setTelephone("22000000");
+        client1.setNumPermis("PERMIS001");
+        client1.setDateInscription(LocalDate.now());
 
-
-        // 2. Création du deuxième client
         Client client2 = new Client();
-
         client2.setNom("Trabelsi");
         client2.setPrenom("Sarra");
-        client2.setEmail("sarra@gmail.com");
-        client2.setTelephone("95123456");
+        client2.setEmail("sarra@example.com");
+        client2.setTelephone("23000000");
+        client2.setNumPermis("PERMIS002");
+        client2.setDateInscription(LocalDate.now());
 
+        Client sauvegarde1 = clientService.create(client1);
+        Client sauvegarde2 = clientService.create(client2);
 
-        // 3. SAVE() du premier client
-        Client clientSaved1 =
-                clientRepo.save(client1);
+        assertNotNull(sauvegarde1.getIdClient());
+        assertNotNull(sauvegarde2.getIdClient());
 
+        System.out.println("Clients créés : "
+                + sauvegarde1.getIdClient() + ", "
+                + sauvegarde2.getIdClient());
 
-        // 4. SAVE() du deuxième client
-        Client clientSaved2 =
-                clientRepo.save(client2);
-
-
-        System.out.println(
-                "Client 1 enregistré : "
-                        + clientSaved1
-        );
-
-        System.out.println(
-                "Client 2 enregistré : "
-                        + clientSaved2
-        );
-
-        assertNotNull(clientSaved1);
-        assertNotNull(clientSaved2);
-
-
-        // 5. FINDALL()
-        // Récupérer tous les clients
-        List<Client> clients =
-                clientRepo.findAll();
-
-        System.out.println(
-                "Liste des clients : "
-                        + clients
-        );
-
-        System.out.println(
-                "Nombre de clients dans la liste : "
-                        + clients.size()
-        );
+        List<Client> clients = clientService.findAll();
 
         assertNotNull(clients);
 
+        System.out.println("Liste des clients : " + clients);
 
-        // 6. FINDBYID()
-        // Rechercher le premier client
-        Client clientTrouve =
-                clientRepo
-                        .findById(
-                                clientSaved1.getIdClient()
-                        )
-                        .orElse(null);
-
-        System.out.println(
-                "Client trouvé par ID : "
-                        + clientTrouve
+        Client trouve = clientService.findById(
+                sauvegarde1.getIdClient()
         );
 
-        assertNotNull(clientTrouve);
+        assertNotNull(trouve);
 
+        System.out.println("Client trouvé : " + trouve);
 
-        // 7. EXISTSBYID()
-        // Tester avec un ID existant
-        boolean clientExiste =
-                clientRepo.existsById(
-                        clientSaved1.getIdClient()
-                );
+        System.out.println("Nombre de clients : " + clients.size());
 
-        System.out.println(
-                "Le client avec l'ID "
-                        + clientSaved1.getIdClient()
-                        + " existe ? "
-                        + clientExiste
-        );
+        Long id1 = sauvegarde1.getIdClient();
+        Long id2 = sauvegarde2.getIdClient();
 
-        assertTrue(clientExiste);
+        clientService.deleteById(id1);
+        clientService.deleteById(id2);
 
+        assertFalse(clientService.findAll()
+                .stream()
+                .anyMatch(c -> id1.equals(c.getIdClient())
+                        || id2.equals(c.getIdClient())));
 
-        // 8. EXISTSBYID()
-        // Tester avec un ID inexistant
-        boolean clientInexistant =
-                clientRepo.existsById(
-                        999999L
-                );
-
-        System.out.println(
-                "Le client avec l'ID 999999 existe ? "
-                        + clientInexistant
-        );
-
-        assertFalse(clientInexistant);
-
-
-        // 9. COUNT()
-        // Compter tous les clients
-        long nombreClients =
-                clientRepo.count();
-
-        System.out.println(
-                "Nombre total de clients : "
-                        + nombreClients
-        );
-
-
-        // PAS DE DELETE
-        // Les deux clients restent dans la base
-
-        System.out.println(
-                "Les deux clients restent enregistrés dans la base."
-        );
-
-        System.out.println(
-                "========== FIN TEST CLIENT ==========\n"
-        );
+        System.out.println("Clients supprimés !");
     }
 
-
-    // =========================================================
-    // TEST 3 : VEHICULE
-    // =========================================================
+    // ==========================================
+    // ATELIER 4 - PARTIE 4 : VEHICULE SERVICE
+    // ==========================================
 
     @Test
-    void testIVehiculeRepository() {
+    void testVehiculeService() {
 
-        System.out.println(
-                "\n========== TEST VEHICULE =========="
+        Vehicule vehicule = new Vehicule();
+
+        vehicule.setImmatriculation("123-TUN-456");
+        vehicule.setMarque("Renault");
+        vehicule.setModele("Clio");
+        vehicule.setTarifJournalier(
+                new BigDecimal("120.00")
         );
 
+        // Les valeurs de categorie et statut
+        // dépendent des constantes de tes enums.
+        vehicule.setCategorie(CategorieVehicule.values()[0]);
+        vehicule.setStatut(StatutVehicule.values()[0]);
 
-        // 1. Création d'un véhicule
-        Vehicule vehicule =
-                new Vehicule();
+        Vehicule sauvegarde = vehiculeService.create(vehicule);
 
-        vehicule.setImmatriculation(
-                "123 TUN 4567"
-        );
+        assertNotNull(sauvegarde);
+        assertNotNull(sauvegarde.getIdVehicule());
 
-        vehicule.setMarque(
-                "Peugeot"
-        );
+        Long id = sauvegarde.getIdVehicule();
 
-        vehicule.setModele(
-                "208"
-        );
+        System.out.println("Véhicule créé : " + sauvegarde);
 
-
-        // 2. SAVE()
-        // Enregistrer le véhicule
-        Vehicule vehiculeSaved =
-                vehiculeRepo.save(vehicule);
-
-        System.out.println(
-                "Véhicule enregistré : "
-                        + vehiculeSaved
-        );
-
-        assertNotNull(vehiculeSaved);
-
-
-        // 3. FINDALL()
-        // Récupérer tous les véhicules
-        List<Vehicule> vehicules =
-                vehiculeRepo.findAll();
-
-        System.out.println(
-                "Liste des véhicules : "
-                        + vehicules
-        );
-
-        System.out.println(
-                "Nombre de véhicules dans la liste : "
-                        + vehicules.size()
-        );
+        List<Vehicule> vehicules = vehiculeService.findAll();
 
         assertNotNull(vehicules);
 
+        System.out.println("Liste des véhicules : " + vehicules);
 
-        // 4. COUNT()
-        // Compter les véhicules
-        long nombreVehicules =
-                vehiculeRepo.count();
+        Vehicule trouve = vehiculeService.findById(id);
 
-        System.out.println(
-                "Nombre total de véhicules : "
-                        + nombreVehicules
-        );
+        assertNotNull(trouve);
 
-
-        // 5. MODIFIER UNE PROPRIÉTÉ
-        // Le modèle était "208"
+        System.out.println("Véhicule trouvé : " + trouve);
 
         System.out.println(
-                "Ancien modèle : "
-                        + vehiculeSaved.getModele()
+                "Nombre de véhicules : " + vehicules.size()
         );
 
+        vehiculeService.deleteById(id);
 
-        // On change 208 en 308
-        vehiculeSaved.setModele(
-                "308"
-        );
+        assertFalse(vehiculeService.findAll()
+                .stream()
+                .anyMatch(v -> id.equals(v.getIdVehicule())));
 
-
-        System.out.println(
-                "Nouveau modèle : "
-                        + vehiculeSaved.getModele()
-        );
-
-
-        // 6. SAVE()
-        // Comme le véhicule possède déjà un ID,
-        // save() enregistre la modification
-        Vehicule vehiculeModifie =
-                vehiculeRepo.save(
-                        vehiculeSaved
-                );
-
-        System.out.println(
-                "Véhicule après modification : "
-                        + vehiculeModifie
-        );
-
-
-        // 7. FINDBYID()
-        // Relire le véhicule depuis la base
-        Vehicule vehiculeTrouve =
-                vehiculeRepo
-                        .findById(
-                                vehiculeSaved.getIdVehicule()
-                        )
-                        .orElse(null);
-
-        System.out.println(
-                "Véhicule trouvé dans la base : "
-                        + vehiculeTrouve
-        );
-
-        assertNotNull(vehiculeTrouve);
-
-
-        // 8. EXISTSBYID()
-        boolean vehiculeExiste =
-                vehiculeRepo.existsById(
-                        vehiculeSaved.getIdVehicule()
-                );
-
-        System.out.println(
-                "Le véhicule existe ? "
-                        + vehiculeExiste
-        );
-
-        assertTrue(vehiculeExiste);
-
-
-        // PAS DE DELETE
-        // Le véhicule reste dans la base
-
-        System.out.println(
-                "Le véhicule reste enregistré dans la base."
-        );
-
-
-        System.out.println(
-                "========== FIN TEST VEHICULE ==========\n"
-        );
+        System.out.println("Véhicule supprimé !");
     }
 }
