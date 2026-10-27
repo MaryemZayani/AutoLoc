@@ -1,11 +1,14 @@
+
 package tn.esprit.autoloc.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "agence")
@@ -27,9 +30,11 @@ public class Agence {
 
     private String telephone;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "agence", cascade = CascadeType.ALL)
     private List<Employe> employes;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "agence", cascade = CascadeType.ALL)
     private List<Vehicule> vehicules;
 }

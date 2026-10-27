@@ -1,15 +1,16 @@
+
 package tn.esprit.autoloc.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.*;
-
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "contrat")
@@ -28,10 +29,15 @@ public class Contrat {
     private BigDecimal montantTotal;
 
     private Boolean valide;
+
     @OneToOne
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
-    @OneToMany(mappedBy = "contrat", cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "contrat",
+            cascade = CascadeType.ALL
+    )
+    @JsonManagedReference("contrat-paiements")
     private List<Paiement> paiements;
 }
